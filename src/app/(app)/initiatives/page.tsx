@@ -16,7 +16,11 @@ export const revalidate = 0;
 export default async function InitiativesPage() {
   const [initiatives, generalDocuments] = await Promise.all([
     prisma.initiative.findMany({ orderBy: { code: "asc" }, include: { markets: { include: { market: true } } } }),
-    prisma.document.findMany({ where: { category: "GENERAL" }, orderBy: { createdAt: "desc" } }),
+    prisma.document.findMany({
+      where: { category: "GENERAL" },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, name: true, pathname: true, size: true, createdAt: true },
+    }),
   ]);
   const initiativeOptions = initiatives.map(({ id, code, name }) => ({ id, code, name }));
 
