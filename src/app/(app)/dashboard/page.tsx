@@ -1,13 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Target, AlertTriangle, ListChecks, ShieldAlert } from "lucide-react";
+import { Target, AlertTriangle, CircleDashed, Globe2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { ActivityTimeline } from "@/components/dashboard/activity-timeline";
 import { UpcomingMeetings } from "@/components/dashboard/upcoming-meetings";
+import { MarketsRefreshButton } from "@/components/markets/markets-refresh-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const marketFlagFiles: Record<string, string> = {
   france: "/flags/france.svg",
@@ -33,23 +35,31 @@ function statusDot(status?: string) {
 }
 
 export default async function DashboardPage() {
-  const [markets, initiatives, openTasksCount, openRisksCount, activities, upcomingMeetings] = await Promise.all([
+  const [markets, initiatives, activities, upcomingMeetings] = await Promise.all([
     prisma.market.findMany({ orderBy: { name: "asc" } }),
     prisma.initiative.findMany({ orderBy: { code: "asc" }, include: { markets: true } }),
-    prisma.task.count({ where: { status: { not: "DONE" } } }),
-    prisma.risk.count({ where: { status: "OPEN" } }),
     prisma.activity.findMany({ orderBy: { createdAt: "desc" }, take: 8 }),
     prisma.meeting.findMany({ where: { date: { gte: new Date() } }, orderBy: { date: "asc" }, take: 5, include: { market: true, initiative: true } }),
   ]);
 
-  const atRiskCount = initiatives.filter((i) => i.status !== "ON_TRACK").length + markets.filter((m) => m.status !== "ON_TRACK").length;
+  const activatedMarketsCount = markets.length;
+  const activeInitiativesCount = initiatives.length;
+  const atRiskCount = initiatives.reduce(
+    (count, initiative) => count + initiative.markets.filter((link) => link.localStatus === "AT_RISK" || link.localStatus === "CRITICAL").length,
+    0,
+  );
+  const notYetStartedCount = initiatives.filter((initiative) => {
+    const linkedMarketIds = new Set(initiative.markets.map((link) => link.marketId));
+    return markets.some((market) => !linkedMarketIds.has(market.id));
+  }).length;
 
   return <div className="pih-dashboard">
+    <div className="mb-3 flex justify-end"><MarketsRefreshButton /></div>
     <div className="pih-kpi-grid grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <KpiCard label="Active Initiatives" value={initiatives.length} icon={Target} hint="Across all markets" />
-      <KpiCard label="At Risk / Critical" value={atRiskCount} icon={AlertTriangle} tone={atRiskCount > 0 ? "warning" : "default"} hint="Markets & initiatives" />
-      <KpiCard label="Open Tasks" value={openTasksCount} icon={ListChecks} hint="Not yet completed" />
-      <KpiCard label="Open Risks" value={openRisksCount} icon={ShieldAlert} tone={openRisksCount > 0 ? "critical" : "default"} hint="Requiring mitigation" />
+      <KpiCard label="RISE-activated markets" value={activatedMarketsCount} icon={Globe2} hint="markets live" />
+      <KpiCard label="Active initiatives" value={activeInitiativesCount} icon={Target} hint="across all markets" />
+      <KpiCard label="At risk" value={atRiskCount} icon={AlertTriangle} tone={atRiskCount > 0 ? "warning" : "default"} hint="not on track" />
+      <KpiCard label="Not yet started" value={notYetStartedCount} icon={CircleDashed} hint="initiatives not started in at least one market" />
     </div>
 
     <Card className="pih-module-card mt-6 flex h-[430px] flex-col">
