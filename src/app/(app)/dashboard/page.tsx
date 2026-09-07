@@ -58,7 +58,7 @@ export default async function DashboardPage() {
     <div className="pih-kpi-grid grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <KpiCard label="RISE-activated markets" value={activatedMarketsCount} icon={Globe2} hint="markets live" />
       <KpiCard label="Active initiatives" value={activeInitiativesCount} icon={Target} hint="across all markets" />
-      <KpiCard label="At risk" value={atRiskCount} icon={AlertTriangle} tone={atRiskCount > 0 ? "warning" : "default"} hint="not on track" />
+      <KpiCard label="At risk" value={atRiskCount} icon={AlertTriangle} tone={atRiskCount > 0 ? "warning" : "default"} hint="not on track · of those active" />
       <KpiCard label="Not yet started" value={notYetStartedCount} icon={CircleDashed} hint="initiatives not started in at least one market" />
     </div>
 
