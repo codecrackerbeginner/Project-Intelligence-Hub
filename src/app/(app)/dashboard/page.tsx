@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Target, AlertTriangle, ListChecks, ShieldAlert, ArrowRight } from "lucide-react";
+import { Target, AlertTriangle, ListChecks, ShieldAlert } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { ActivityTimeline } from "@/components/dashboard/activity-timeline";
@@ -55,7 +55,6 @@ export default async function DashboardPage() {
     <Card className="pih-module-card mt-6 flex h-[430px] flex-col">
       <CardHeader className="flex shrink-0 flex-row items-center justify-between pb-3">
         <CardTitle className="text-base">Initiatives</CardTitle>
-        <Link href="/initiatives" className="pih-inline-action flex items-center gap-1 text-xs font-medium text-primary">View all <ArrowRight className="h-3.5 w-3.5" /></Link>
       </CardHeader>
       <CardContent className="min-h-0 flex-1 overflow-auto pr-3 [scrollbar-gutter:stable]">
         <table className="w-full min-w-max border-separate border-spacing-0 text-sm">
