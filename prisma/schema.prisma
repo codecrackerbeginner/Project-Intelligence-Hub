@@ -6,196 +6,144 @@ generator client {
   output   = "../src/generated/prisma"
 }
 
-datasource db {
-  provider = "postgresql"
-}
+datasource db { provider = "postgresql" }
 
-enum Health {
-  ON_TRACK
-  AT_RISK
-  CRITICAL
-}
-
-enum TaskStatus {
-  TODO
-  IN_PROGRESS
-  DONE
-  BLOCKED
-}
-
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-}
-
-enum RiskSeverity {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-enum RiskStatus {
-  OPEN
-  MITIGATED
-  CLOSED
-}
-
-enum MeetingScope {
-  MARKET
-  INITIATIVE
-}
-
-enum MeetingType {
-  STATUS_REVIEW
-  STEERING_COMMITTEE
-  WORKSHOP
-  KICKOFF
-  OTHER
-}
+enum Health { ON_TRACK AT_RISK CRITICAL }
+enum TaskStatus { TODO IN_PROGRESS DONE BLOCKED }
+enum Priority { LOW MEDIUM HIGH }
+enum RiskSeverity { LOW MEDIUM HIGH CRITICAL }
+enum RiskStatus { OPEN MITIGATED CLOSED }
+enum MeetingScope { MARKET INITIATIVE }
+enum MeetingType { STATUS_REVIEW STEERING_COMMITTEE WORKSHOP KICKOFF OTHER }
 
 model Market {
-  id                   String   @id @default(cuid())
-  name                 String
-  code                 String   @unique
-  region               String
-  lead                 String
-  status               Health   @default(ON_TRACK)
-  milestoneCompleted   Int      @default(0)
-  milestoneUpdatedAt   DateTime?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-
+  id String @id @default(cuid())
+  name String
+  code String @unique
+  region String
+  lead String
+  status Health @default(ON_TRACK)
+  milestoneCompleted Int @default(0)
+  milestoneUpdatedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   initiatives MarketInitiative[]
-  meetings    Meeting[]
-  documents   Document[]
-  notes       Note[]
-  tasks       Task[]
+  meetings Meeting[]
+  documents Document[]
+  notes Note[]
+  tasks Task[]
 }
 
 model Initiative {
-  id          String   @id @default(cuid())
-  code        String   @unique
-  name        String
+  id String @id @default(cuid())
+  code String @unique
+  name String
   description String
-  owner       String
-  status      Health   @default(ON_TRACK)
-  progress    Int      @default(0)
-  startDate   DateTime
-  targetDate  DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  markets   MarketInitiative[]
-  tasks     Task[]
-  risks     Risk[]
-  meetings  Meeting[]
+  owner String
+  status Health @default(ON_TRACK)
+  progress Int @default(0)
+  startDate DateTime
+  targetDate DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  markets MarketInitiative[]
+  tasks Task[]
+  risks Risk[]
+  meetings Meeting[]
   documents Document[]
-  notes     Note[]
+  notes Note[]
 }
 
 model Document {
-  id          String   @id @default(cuid())
-  name        String
-  pathname    String   @unique
-  blobUrl     String
+  id String @id @default(cuid())
+  name String
+  pathname String @unique
+  blobUrl String
   contentType String?
-  size        Int
-  createdAt   DateTime @default(now())
-
+  size Int
+  category String?
+  createdAt DateTime @default(now())
   marketId String?
-  market   Market? @relation(fields: [marketId], references: [id], onDelete: Cascade)
-
+  market Market? @relation(fields: [marketId], references: [id], onDelete: Cascade)
   initiativeId String?
-  initiative   Initiative? @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  initiative Initiative? @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
 }
 
 model Note {
-  id        String   @id @default(cuid())
-  content   String
+  id String @id @default(cuid())
+  content String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   marketId String
-  market   Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
-
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
   initiativeId String
-  initiative   Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
-
+  initiative Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
   @@index([marketId])
   @@index([initiativeId])
 }
 
 model MarketInitiative {
-  id           String  @id @default(cuid())
-  marketId     String
+  id String @id @default(cuid())
+  marketId String
   initiativeId String
-  localStatus  Health  @default(ON_TRACK)
-  localLead    String
-
-  market     Market     @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  localStatus Health @default(ON_TRACK)
+  localLead String
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
   initiative Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
-
   @@unique([marketId, initiativeId])
 }
 
 model Task {
-  id          String     @id @default(cuid())
-  title       String
+  id String @id @default(cuid())
+  title String
   description String
-  status      TaskStatus @default(TODO)
-  priority    Priority   @default(MEDIUM)
-  assignee    String
-  dueDate     DateTime
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
+  status TaskStatus @default(TODO)
+  priority Priority @default(MEDIUM)
+  assignee String
+  dueDate DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   initiativeId String?
-  initiative   Initiative? @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
-
+  initiative Initiative? @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
   marketId String?
-  market   Market? @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  market Market? @relation(fields: [marketId], references: [id], onDelete: Cascade)
 }
 
 model Risk {
-  id             String       @id @default(cuid())
-  title          String
-  description    String
-  severity       RiskSeverity @default(MEDIUM)
-  status         RiskStatus   @default(OPEN)
-  owner          String
+  id String @id @default(cuid())
+  title String
+  description String
+  severity RiskSeverity @default(MEDIUM)
+  status RiskStatus @default(OPEN)
+  owner String
   identifiedDate DateTime
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   initiativeId String
-  initiative   Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  initiative Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
 }
 
 model Meeting {
-  id        String       @id @default(cuid())
-  title     String
-  type      MeetingType  @default(STATUS_REVIEW)
-  scope     MeetingScope
-  date      DateTime
-  notes     String
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-
+  id String @id @default(cuid())
+  title String
+  type MeetingType @default(STATUS_REVIEW)
+  scope MeetingScope
+  date DateTime
+  notes String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   marketId String?
-  market   Market? @relation(fields: [marketId], references: [id], onDelete: Cascade)
-
+  market Market? @relation(fields: [marketId], references: [id], onDelete: Cascade)
   initiativeId String?
-  initiative   Initiative? @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  initiative Initiative? @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
 }
 
 model Activity {
-  id          String   @id @default(cuid())
-  type        String
+  id String @id @default(cuid())
+  type String
   description String
-  entityType  String
-  entityId    String
-  actor       String
-  createdAt   DateTime @default(now())
+  entityType String
+  entityId String
+  actor String
+  createdAt DateTime @default(now())
 }
