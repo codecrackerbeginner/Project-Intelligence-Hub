@@ -8,12 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 type Initiative = { id: string; code: string; name: string };
-type Note = { id: string; content: string; createdAt: string | Date; initiative: Initiative };
+type Note = { id: string; content: string; createdAt: string | Date; initiative: Initiative | null };
 
 export function NotesCard({ marketId, initiatives, notes }: { marketId: string; initiatives: Initiative[]; notes: Note[] }) {
   const router = useRouter();
   const [content, setContent] = useState("");
-  const [initiativeId, setInitiativeId] = useState(initiatives[0]?.id ?? "");
+  const [initiativeId, setInitiativeId] = useState("GENERAL");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [summary, setSummary] = useState("");
@@ -21,7 +21,7 @@ export function NotesCard({ marketId, initiatives, notes }: { marketId: string; 
   const [summarizing, setSummarizing] = useState(false);
 
   async function saveNote() {
-    if (!content.trim() || !initiativeId) return;
+    if (!content.trim()) return;
     setSaving(true); setError("");
     const response = await fetch("/api/notes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content, marketId, initiativeId }) });
     if (!response.ok) { const data = await response.json().catch(() => ({})); setError(data.error ?? "Could not save note."); setSaving(false); return; }
@@ -43,11 +43,11 @@ export function NotesCard({ marketId, initiatives, notes }: { marketId: string; 
         <textarea value={content} onChange={(e)=>setContent(e.target.value)} placeholder="Add a note for this market..." rows={4} className="w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
         <div className="grid grid-cols-1 gap-2 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center">
           <select value={initiativeId} onChange={(e)=>setInitiativeId(e.target.value)} className="h-10 min-w-0 w-full rounded-md border border-input bg-background px-3 text-sm">
+            <option value="GENERAL">General</option>
             {initiatives.map(i=><option key={i.id} value={i.id}>{i.code} · {i.name}</option>)}
           </select>
-          <Button className="h-10 w-full whitespace-nowrap xl:w-auto xl:min-w-28" onClick={saveNote} disabled={saving || !content.trim() || !initiativeId}>{saving ? "Saving..." : "Save Note"}</Button>
+          <Button className="h-10 w-full whitespace-nowrap xl:w-auto xl:min-w-28" onClick={saveNote} disabled={saving || !content.trim()}>{saving ? "Saving..." : "Save Note"}</Button>
         </div>
-        {initiatives.length===0&&<p className="text-xs text-muted-foreground">No initiatives available.</p>}
         {error&&<p className="text-xs text-destructive">{error}</p>}
       </div>
 
@@ -65,7 +65,7 @@ export function NotesCard({ marketId, initiatives, notes }: { marketId: string; 
 
       <div className="max-h-72 space-y-2 overflow-y-auto pr-2">
         {notes.length===0&&<p className="text-sm text-muted-foreground">No notes added yet.</p>}
-        {notes.map(note=><div key={note.id} className="rounded-lg border p-3"><div className="mb-1 flex flex-wrap items-center justify-between gap-2"><p className="text-xs font-medium">{note.initiative.code} · {note.initiative.name}</p><p className="text-xs text-muted-foreground">{format(new Date(note.createdAt), "MMM d, yyyy · HH:mm")}</p></div><p className="whitespace-pre-wrap text-sm">{note.content}</p></div>)}
+        {notes.map(note=><div key={note.id} className="rounded-lg border p-3"><div className="mb-1 flex flex-wrap items-center justify-between gap-2"><p className="text-xs font-medium">{note.initiative ? `${note.initiative.code} · ${note.initiative.name}` : "General"}</p><p className="text-xs text-muted-foreground">{format(new Date(note.createdAt), "MMM d, yyyy · HH:mm")}</p></div><p className="whitespace-pre-wrap text-sm">{note.content}</p></div>)}
       </div>
     </CardContent>
   </Card>;
