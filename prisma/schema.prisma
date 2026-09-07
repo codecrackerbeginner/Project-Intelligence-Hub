@@ -121,8 +121,8 @@ model Note {
   marketId String
   market   Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
 
-  initiativeId String
-  initiative   Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  initiativeId String?
+  initiative   Initiative? @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
 
   @@index([marketId])
   @@index([initiativeId])
