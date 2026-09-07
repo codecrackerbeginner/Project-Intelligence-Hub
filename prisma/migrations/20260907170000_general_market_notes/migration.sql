@@ -1,0 +1,1 @@
+ALTER TABLE "Note" ALTER COLUMN "initiativeId" DROP NOT NULL;
