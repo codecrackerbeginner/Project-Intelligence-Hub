@@ -59,10 +59,10 @@ export default async function DashboardPage() {
       </CardHeader>
       <CardContent className="min-h-0 flex-1 overflow-auto pr-3 [scrollbar-gutter:stable]">
         <table className="w-full min-w-max border-separate border-spacing-0 text-sm">
-          <thead className="sticky top-0 z-10 bg-card">
+          <thead className="sticky top-0 z-30 bg-card">
             <tr>
-              <th className="w-24 border-b border-border px-3 py-3 text-left text-xs font-medium text-muted-foreground">ID</th>
-              <th className="min-w-64 border-b border-border px-3 py-3 text-left text-xs font-medium text-muted-foreground">Name</th>
+              <th className="sticky left-0 z-40 w-24 min-w-24 border-b border-border bg-card px-3 py-3 text-left text-xs font-medium text-muted-foreground">ID</th>
+              <th className="sticky left-24 z-40 w-80 min-w-80 border-b border-r border-border bg-card px-3 py-3 text-left text-xs font-medium text-muted-foreground shadow-[8px_0_10px_-10px_rgba(0,0,0,0.35)]">Name</th>
               {markets.map((market) => {
                 const flagSrc = marketFlagFiles[market.name.trim().toLowerCase()];
                 return <th key={market.id} className="w-16 border-b border-border px-3 py-2 text-center">
@@ -74,10 +74,10 @@ export default async function DashboardPage() {
           <tbody>
             {initiatives.map((initiative) => {
               const marketStatuses = new Map(initiative.markets.map((link) => [link.marketId, link.localStatus]));
-              return <tr key={initiative.id} className="group hover:bg-secondary/40">
-                <td className="border-b border-border/60 px-3 py-3 font-medium text-muted-foreground"><Link href={`/initiatives/${initiative.id}`}>{initiative.code}</Link></td>
-                <td className="border-b border-border/60 px-3 py-3 font-medium text-foreground"><Link href={`/initiatives/${initiative.id}`}>{initiative.name}</Link></td>
-                {markets.map((market) => <td key={market.id} className="border-b border-border/60 px-3 py-3 text-center">{statusDot(marketStatuses.get(market.id))}</td>)}
+              return <tr key={initiative.id} className="group">
+                <td className="sticky left-0 z-20 w-24 min-w-24 border-b border-border/60 bg-card px-3 py-3 font-medium text-muted-foreground group-hover:bg-secondary"><Link href={`/initiatives/${initiative.id}`}>{initiative.code}</Link></td>
+                <td className="sticky left-24 z-20 w-80 min-w-80 border-b border-r border-border/60 bg-card px-3 py-3 font-medium text-foreground shadow-[8px_0_10px_-10px_rgba(0,0,0,0.35)] group-hover:bg-secondary"><Link href={`/initiatives/${initiative.id}`}>{initiative.name}</Link></td>
+                {markets.map((market) => <td key={market.id} className="border-b border-border/60 px-3 py-3 text-center group-hover:bg-secondary/40">{statusDot(marketStatuses.get(market.id))}</td>)}
               </tr>;
             })}
           </tbody>
