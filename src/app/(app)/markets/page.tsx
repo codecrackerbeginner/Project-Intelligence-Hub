@@ -2,9 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/shared/page-header";
+import { MarketsRefreshButton } from "@/components/markets/markets-refresh-button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { healthTone } from "@/lib/status";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const marketFlagImages: Record<string, string> = {
   france: "/flags/france.svg",
@@ -25,10 +29,13 @@ const marketFlagImages: Record<string, string> = {
 };
 
 export default async function MarketsPage() {
-  const markets = await prisma.market.findMany({ orderBy: { name: "asc" }, include: { initiatives: true } });
+  const markets = await prisma.market.findMany({
+    orderBy: { name: "asc" },
+    include: { _count: { select: { initiatives: true } } },
+  });
   return (
     <div>
-      <PageHeader title="Markets" description="Regional markets participating in the sales transformation program." />
+      <PageHeader title="Markets" description="Regional markets participating in the sales transformation program." actions={<MarketsRefreshButton />} />
       <div className="max-h-[calc(100vh-12rem)] overflow-y-auto pr-2">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {markets.map((market) => {
@@ -49,7 +56,7 @@ export default async function MarketsPage() {
                   <CardContent className="space-y-2 text-sm">
                     <div className="flex justify-between text-muted-foreground"><span>Region</span><span className="text-foreground">{market.region}</span></div>
                     <div className="flex justify-between text-muted-foreground"><span>Market Lead</span><span className="text-foreground">{market.lead}</span></div>
-                    <div className="flex justify-between text-muted-foreground"><span>Linked Initiatives</span><span className="text-foreground">{market.initiatives.length}</span></div>
+                    <div className="flex justify-between text-muted-foreground"><span>Linked Initiatives</span><span className="text-foreground">{market._count.initiatives}</span></div>
                   </CardContent>
                 </Card>
               </Link>
