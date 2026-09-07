@@ -43,17 +43,17 @@ export async function POST(request: Request) {
     if (!market) return NextResponse.json({ error: "Market not found." }, { status: 404 });
     if (market.notes.length === 0) return NextResponse.json({ error: "No notes available yet." }, { status: 400 });
 
-    const latestByInitiative = new Map<string, (typeof market.notes)[number]>();
-    for (const note of market.notes) latestByInitiative.set(note.initiative.id, note);
-    const latest = Array.from(latestByInitiative.values()).sort((a, b) => a.initiative.code.localeCompare(b.initiative.code));
+    const latestByCategory = new Map<string, (typeof market.notes)[number]>();
+    for (const note of market.notes) latestByCategory.set(note.initiative?.id ?? "__general__", note);
+    const latest = Array.from(latestByCategory.values()).sort((a, b) => (a.initiative?.code ?? "GENERAL").localeCompare(b.initiative?.code ?? "GENERAL"));
     const newest = market.notes[market.notes.length - 1];
     const openPoints = matchingLines(market.notes, OPEN_POINT);
     const risks = matchingLines(market.notes, RISK);
     const decisions = matchingLines(market.notes, DECISION);
 
     const sections = [
-      `Overall: ${market.name} has ${market.notes.length} recorded update${market.notes.length === 1 ? "" : "s"} across ${latest.length} initiative${latest.length === 1 ? "" : "s"}. The latest recorded update is from ${newest.createdAt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}.`,
-      "Initiative Updates:\n" + latest.map((note) => `• ${note.initiative.code} · ${note.initiative.name}: ${firstUsefulLine(note.content)}`).join("\n"),
+      `Overall: ${market.name} has ${market.notes.length} recorded update${market.notes.length === 1 ? "" : "s"} across ${latest.length} categor${latest.length === 1 ? "y" : "ies"}. The latest recorded update is from ${newest.createdAt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}.`,
+      "Updates:\n" + latest.map((note) => `• ${note.initiative ? `${note.initiative.code} · ${note.initiative.name}` : "General"}: ${firstUsefulLine(note.content)}`).join("\n"),
       openPoints.length ? "Open Points:\n" + openPoints.map((item) => `• ${item}`).join("\n") : "",
       decisions.length ? "Decisions:\n" + decisions.map((item) => `• ${item}`).join("\n") : "",
       risks.length ? "Risks / Issues:\n" + risks.map((item) => `• ${item}`).join("\n") : "",
