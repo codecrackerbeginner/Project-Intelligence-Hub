@@ -82,6 +82,7 @@ model Initiative {
   owner       String
   status      Health   @default(ON_TRACK)
   progress    Int      @default(0)
+  stage       String   @default("IDEATION")
   startDate   DateTime
   targetDate  DateTime
   createdAt   DateTime @default(now())
